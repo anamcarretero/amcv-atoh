@@ -1,0 +1,240 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-icons/editor-icons.html">
+<link rel="import" href="../iron-flex-layout/iron-flex-layout.html">
+
+<!--
+`amcv-atoh`
+
+
+@demo demo/index.html 
+-->
+
+<dom-module id="amcv-atoh">
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            paper-toolbar paper-icon-button {
+                color: white;
+            }
+
+            .header {
+                background-color: #00B0FF;
+                @apply(--layout-horizontal);
+                @apply(--layout-end-justified);
+            }
+
+            .content {
+                padding: 30px;
+            }
+
+            code {
+                font-family: monospace;
+                @apply(--layout-vertical);
+                font-size: 0;
+            }
+
+            code span {
+                font-size: 14px;
+                line-height: 1.5em;
+            }
+
+            .code-key {
+                color: rgba(0, 0, 0, 0.87);
+                font-weight: bold;
+            }
+
+            .code-value {
+                color: rgba(0, 0, 0, 0.87);
+            }
+
+            paper-input-container {
+                --paper-input-container-input: {
+                    display: inline-block;
+                    width: 40%;
+                    color: rgba(0, 0, 0, 0.87);
+                }
+            }
+
+            .separator {
+                line-height: 24px;
+            }
+
+            .hovered {
+                visibility: hidden;
+            }
+
+            .item-block:hover .hovered, .item-block:focus .hovered {
+                visibility: visible;
+            }
+
+        </style>
+
+        <div class="header">
+            <paper-toolbar>
+                <paper-icon-button icon="refresh" on-tap="refresh"></paper-icon-button>
+                <paper-icon-button icon="add" on-tap="setAddMode"></paper-icon-button>
+                <template is="dom-if" if="[[isOnEditionMode]]">
+                    <paper-icon-button icon="close" on-tap="setViewMode"></paper-icon-button>
+                </template>
+                <template is="dom-if" if="[[isOnViewMode]]">
+                    <paper-icon-button icon="editor:mode-edit" on-tap="setEditionMode"></paper-icon-button>
+                </template>
+            </paper-toolbar>
+        </div>
+
+        <div class="content">
+
+            <template is="dom-if" if="[[isOnViewMode]]">
+                <code>
+                    <template is="dom-repeat" items="[[data]]">
+                        <div>
+                            <span class="code-key">[[item.key]]</span>
+                            <span class="separator">: </span>
+                            <span class="code-value">[[item.value]]</span>
+                        </div>
+                    </template>
+                </code>
+            </template>
+
+            <template is="dom-if" if="[[isOnEditionMode]]">
+                <template is="dom-repeat" items="[[data]]">
+                    <paper-input-container class="item-block" no-label-float>
+                        <input class="horizontal" is="iron-input" value="[[item.key]]" placeholder="key">
+                        <span>: </span>
+                        <input class="horizontal" is="iron-input" value="[[item.value]]" placeholder="value">
+                        <paper-icon-button class="hovered" suffix icon="delete"></paper-icon-button>
+                    </paper-input-container>
+                </template>
+            </template>
+
+            <template is="dom-if" if="[[isOnAddMode]]">
+                <paper-input-container id="newItemBlock" class="item-block" focused="true">
+                    <input id="newItemKeyInput" class="horizontal" is="iron-input" bind-value="{{newValue.key}}"
+                           placeholder="key">
+                    <span>: </span>
+                    <input id="newItemKeyValue" class="horizontal" is="iron-input" bind-value="{{newValue.value}}"
+                           placeholder="value">
+                    <paper-icon-button class="hovered" suffix icon="send" on-tap="addNewItem"></paper-icon-button>
+                    <paper-icon-button class="hovered" suffix icon="close" on-tap="exitFromAddMode"></paper-icon-button>
+                </paper-input-container>
+            </template>
+
+        </div>
+
+
+    </template>
+
+    <script>
+        Polymer({
+
+            is: 'amcv-atoh',
+
+            properties: {
+                mode: {
+                    type: String,
+                    value: 'view'
+                },
+                modes: {
+                    type: Object,
+                    value: {'edition': 'edition', 'view': 'view', 'add': 'add'}
+                },
+                isOnEditionMode: {
+                    type: Boolean,
+                    value: false
+                },
+                isOnViewMode: {
+                    type: Boolean,
+                    value: true
+                },
+                isOnAddMode: {
+                    type: Boolean,
+                    value: false
+                },
+                newValue: {
+                    type: Object,
+                    value: {'key': '', 'value': ''},
+                    notify: true
+                },
+                data: {
+                    type: Array,
+                    value: [],
+                    observer: '_dataChanged'
+                },
+                json: {
+                    type: Object,
+                    observer: '_jsonChanged',
+                    value: {"type": "keys",
+                        "keys": [{"key": "ui.key1", "value": "value1"}, {
+                            "key": "ui.key2",
+                            "value": "value2"
+                        }, {"key": "ui.key3", "value": "value3"}]
+                    }
+                }
+            },
+
+            observers: ['setMode(mode,modes)'],
+
+            _jsonChanged: function () {
+                this.set('data', this.json.keys);
+            },
+
+            _dataChanged: function () {
+                return;
+            },
+
+            setMode: function (mode, modes) {
+                if (this.modes === undefined || this.mode === undefined) {
+                    return;
+                }
+
+                else if (mode === modes.add) {
+                    this.isOnAddMode = true;
+                }
+
+                else {
+                    this.isOnEditionMode = (mode === modes.edition);
+                    this.isOnViewMode = !this.isOnEditionMode;
+                }
+            },
+
+            setViewMode: function () {
+                this.setMode(this.modes.view, this.modes);
+            },
+
+            setEditionMode: function () {
+                this.setMode(this.modes.edition, this.modes);
+            },
+
+            setAddMode: function () {
+                this.setMode(this.modes.add, this.modes);
+            },
+
+            exitFromAddMode: function () {
+                this.isOnAddMode = false;
+                this.set('newValue.key', '');
+                this.set('newValue.value', '');
+            },
+
+            addNewItem: function () {
+                var newItem = new Object();
+                newItem.key = this.newValue.key;
+                newItem.value = this.newValue.value;
+                this.push('data', newItem);
+                this.set('newValue.key', '');
+                this.set('newValue.value', '');
+            },
+
+            refresh: function () {
+                this.fire('refresh');
+            }
+
+        });
+    </script>
+</dom-module>
