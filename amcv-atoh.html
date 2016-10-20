@@ -25,13 +25,13 @@
             }
 
             .header {
-                background-color: #00B0FF;
+                background-color: var(--atoh-bg-header-color, #669999);
                 @apply(--layout-horizontal);
                 @apply(--layout-end-justified);
             }
 
             .content {
-                padding: 30px;
+                padding: 15px 20px;
             }
 
             code {
@@ -59,7 +59,29 @@
                     display: inline-block;
                     width: 40%;
                     color: rgba(0, 0, 0, 0.87);
+                    height: 28px;
+                    font-size: 14px;
+                    line-height: 24px;
+                    text-overflow: ellipsis;
                 }
+            }
+
+            paper-input-container ::content .input-content.paper-input-container {
+                height: 28px;
+            }
+
+            paper-input-container span {
+                line-height: 24px;
+                display: inline-block;
+                vertical-align: super;
+                font-size: 14px;
+                padding: 0 2px;
+            }
+
+            paper-icon-button[icon="delete"] {
+                width: 24px;
+                padding: 0px 0;
+                color: #66cccc;
             }
 
             .separator {
