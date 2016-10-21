@@ -159,6 +159,10 @@
             is: 'amcv-atoh',
 
             properties: {
+                name: String,
+
+                method: String,
+
                 mode: {
                     type: String,
                     value: 'view'
@@ -216,7 +220,6 @@
             ],
 
             _newValueChanged: function() {
-                console.log('changed');
                 this.notifyPath('newValue');
             },
 
@@ -263,10 +266,13 @@
 
             addNewItem: function () {
                 var newItem = new Object();
-                newItem.key = this.newValue.key;
-                newItem.value = this.newValue.value;
+                var keysObject = new Object();
+                newItem.name = this.name;
+                newItem.method = "POST";
+                keysObject.key = this.newValue.key;
+                keysObject.value = this.newValue.value;
+                newItem.keys = keysObject;
                 this.set('valueToSend', newItem);
-                this.push('data', newItem);
                 this.set('newValue.key', '');
                 this.set('newValue.value', '');
             },
