@@ -163,32 +163,45 @@
                     type: String,
                     value: 'view'
                 },
+
                 modes: {
                     type: Object,
                     value: {'edition': 'edition', 'view': 'view', 'add': 'add'}
                 },
+
                 isOnEditionMode: {
                     type: Boolean,
                     value: false
                 },
+
                 isOnViewMode: {
                     type: Boolean,
                     value: true
                 },
+
                 isOnAddMode: {
                     type: Boolean,
                     value: false
                 },
+
                 newValue: {
                     type: Object,
                     value: {'key': '', 'value': ''},
+                    notify: true,
+                    observer: '_newValueChanged'
+                },
+
+                valueToSend: {
+                    type: Object,
                     notify: true
                 },
+
                 data: {
                     type: Array,
                     value: [],
                     observer: '_dataChanged'
                 },
+
                 json: {
                     type: Object,
                     observer: '_jsonChanged',
@@ -198,7 +211,14 @@
                 }
             },
 
-            observers: ['setMode(mode,modes)'],
+            observers: ['setMode(mode,modes)'
+                , '_newValueChanged(newValue.*)'
+            ],
+
+            _newValueChanged: function() {
+                console.log('changed');
+                this.notifyPath('newValue');
+            },
 
             _jsonChanged: function () {
                 this.set('data', this.json.keys);
@@ -245,6 +265,7 @@
                 var newItem = new Object();
                 newItem.key = this.newValue.key;
                 newItem.value = this.newValue.value;
+                this.set('valueToSend', newItem);
                 this.push('data', newItem);
                 this.set('newValue.key', '');
                 this.set('newValue.value', '');
