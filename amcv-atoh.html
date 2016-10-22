@@ -147,10 +147,7 @@
                     <paper-icon-button class="hovered" suffix icon="close" on-tap="exitFromAddMode"></paper-icon-button>
                 </paper-input-container>
             </template>
-
         </div>
-
-
     </template>
 
     <script>
@@ -202,8 +199,7 @@
 
                 data: {
                     type: Array,
-                    value: [],
-                    observer: '_dataChanged'
+                    value: []
                 },
 
                 json: {
@@ -215,8 +211,8 @@
                 }
             },
 
-            observers: ['setMode(mode,modes)'
-                , '_newValueChanged(newValue.*)'
+            observers: ['setMode(mode,modes)',
+                '_newValueChanged(newValue.*)'
             ],
 
             _newValueChanged: function() {
@@ -225,10 +221,6 @@
 
             _jsonChanged: function () {
                 this.set('data', this.json.keys);
-            },
-
-            _dataChanged: function () {
-                return;
             },
 
             setMode: function (mode, modes) {
