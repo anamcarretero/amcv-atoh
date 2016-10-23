@@ -85,6 +85,9 @@
                 --paper-input-container-label-floating: {
                     line-height: 0;
                 };
+                --paper-input-container-underline-focus: {
+                    background: #66cccc;
+                }
             }
 
             paper-input-container ::content .input-content.paper-input-container {
@@ -121,7 +124,7 @@
 
         <div class="header">
             <paper-toolbar>
-                <paper-icon-button icon="refresh" on-tap="refresh"></paper-icon-button>
+                <paper-icon-button icon="refresh"></paper-icon-button>
                 <paper-icon-button icon="add" on-tap="setAddMode"></paper-icon-button>
                 <template is="dom-if" if="[[isOnEditionMode]]">
                     <paper-icon-button icon="close" on-tap="setViewMode"></paper-icon-button>
@@ -147,14 +150,17 @@
             </template>
 
             <template is="dom-if" if="[[isOnEditionMode]]">
-                <template is="dom-repeat" items="[[data]]">
-                    <paper-input-container class="item-block" no-label-float>
-                        <input class="horizontal" is="iron-input" value="[[item.key]]" placeholder="key" required>
-                        <span>: </span>
-                        <input class="horizontal" is="iron-input" value="[[item.value]]" placeholder="value">
-                        <paper-icon-button class="hovered" suffix icon="delete" on-tap="createDeleteRequest"></paper-icon-button>
-                    </paper-input-container>
-                </template>
+                <iron-a11y-keys id="a11yEdition" target="[[valueInputEditionTarget]]" keys="enter" on-keys-pressed="createModifyRequest"></iron-a11y-keys>
+                <div id="itemsToEditValue">
+                    <template is="dom-repeat" items="[[data]]">
+                        <paper-input-container id="editableItem" class="item-block" no-label-float>
+                            <input class="horizontal" is="iron-input" value="[[item.key]]" placeholder="key" required>
+                            <span>: </span>
+                            <input class="horizontal" is="iron-input" value="[[item.value]]" placeholder="value">
+                            <paper-icon-button class="hovered" suffix icon="delete" on-tap="createDeleteRequest"></paper-icon-button>
+                        </paper-input-container>
+                    </template>
+                </div>
             </template>
 
             <template is="dom-if" if="[[isOnAddMode]]">
@@ -216,6 +222,12 @@
                     observer: '_newValueChanged'
                 },
 
+                editableValue: {
+                    type: Object,
+                    value: {'key': '', 'value': ''},
+                    notify: true
+                },
+
                 valueToSend: {
                     type: Object,
                     notify: true
@@ -245,6 +257,13 @@
                     type: Object,
                     value: function() {
                         return this.$.newItemValue;
+                    }
+                },
+
+                valueInputEditionTarget: {
+                    type: Object,
+                    value: function () {
+                        return this.$.itemsToEditValue;
                     }
                 }
             },
@@ -309,7 +328,7 @@
                 this.set('newValue.value', '');
             },
 
-            createAddRequest: function () {
+            createAddRequest: function (event) {
                 if(Polymer.dom(this.root).querySelector('#newItemKey').validate() &&
                         Polymer.dom(this.root).querySelector('#newItemValue').validate()) {
                     var newItem = new Object();
@@ -325,19 +344,30 @@
                 }
             },
 
+            createModifyRequest: function (event) {
+                var parent = event.detail.keyboardEvent.srcElement.parentNode;
+                var keyInput = parent.querySelectorAll('input')[0];
+                var valueInput = parent.querySelectorAll('input')[1];
+                if(keyInput.validate() && valueInput.validate()) {
+                    var newItem = new Object();
+                    var keysObject = new Object();
+                    newItem.name = this.name;
+                    newItem.method = "POST";
+                    keysObject.key = keyInput.value;
+                    keysObject.value = valueInput.value;
+                    newItem.keys = keysObject;
+                    this.set('valueToSend', newItem);
+                }
+            },
+
             createDeleteRequest: function(event) {
                 if (event.target.parentNode.querySelectorAll('input')[0].validate()) {
                     var newItem = new Object();
-                    var keysObject = new Object();
                     newItem.name = this.name;
                     newItem.method = 'DELETE';
                     newItem.params = {key: event.target.parentNode.querySelectorAll('input')[0].value };
                     this.set('valueToSend', newItem);
                 }
-            },
-
-            refresh: function () {
-                this.fire('refresh');
             }
 
         });
