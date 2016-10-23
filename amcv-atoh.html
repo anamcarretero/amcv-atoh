@@ -102,7 +102,7 @@
             paper-icon-button[icon="delete"] {
                 width: 24px;
                 padding: 0px 0;
-                color: #66cccc;
+                color: #ff6666;
             }
 
             .separator {
@@ -149,24 +149,24 @@
             <template is="dom-if" if="[[isOnEditionMode]]">
                 <template is="dom-repeat" items="[[data]]">
                     <paper-input-container class="item-block" no-label-float>
-                        <input class="horizontal" is="iron-input" value="[[item.key]]" placeholder="key">
+                        <input class="horizontal" is="iron-input" value="[[item.key]]" placeholder="key" required>
                         <span>: </span>
                         <input class="horizontal" is="iron-input" value="[[item.value]]" placeholder="value">
-                        <paper-icon-button class="hovered" suffix icon="delete"></paper-icon-button>
+                        <paper-icon-button class="hovered" suffix icon="delete" on-tap="createDeleteRequest"></paper-icon-button>
                     </paper-input-container>
                 </template>
             </template>
 
             <template is="dom-if" if="[[isOnAddMode]]">
-                <!--<iron-a11y-keys id="a11y" target="[[keyInputTarget]]" keys="enter" on-keys-pressed="addNewItem"></iron-a11y-keys>-->
-                <iron-a11y-keys id="a11y" target="[[valueInputTarget]]" keys="enter" on-keys-pressed="addNewItem"></iron-a11y-keys>
+                <!--<iron-a11y-keys id="a11y" target="[[keyInputTarget]]" keys="enter" on-keys-pressed="createAddRequest"></iron-a11y-keys>-->
+                <iron-a11y-keys id="a11y" target="[[valueInputTarget]]" keys="enter" on-keys-pressed="createAddRequest"></iron-a11y-keys>
                 <paper-input-container id="newItemBlock" class="item-block" focused="true">
                     <input id="newItemKey" class="horizontal" is="iron-input" bind-value="{{newValue.key::input}}"
                            placeholder="key" required>
                     <span>: </span>
                     <input id="newItemValue" class="horizontal" is="iron-input" bind-value="{{newValue.value::input}}"
                            placeholder="value" required>
-                    <!--<paper-icon-button class="hovered" suffix icon="send" on-tap="addNewItem"></paper-icon-button>-->
+                    <!--<paper-icon-button class="hovered" suffix icon="send" on-tap="createAddRequest"></paper-icon-button>-->
                     <paper-icon-button class="hovered" suffix icon="close" on-tap="exitFromAddMode"></paper-icon-button>
                 </paper-input-container>
             </template>
@@ -309,7 +309,7 @@
                 this.set('newValue.value', '');
             },
 
-            addNewItem: function () {
+            createAddRequest: function () {
                 if(Polymer.dom(this.root).querySelector('#newItemKey').validate() &&
                         Polymer.dom(this.root).querySelector('#newItemValue').validate()) {
                     var newItem = new Object();
@@ -322,6 +322,17 @@
                     this.set('valueToSend', newItem);
                     this.set('newValue.key', '');
                     this.set('newValue.value', '');
+                }
+            },
+
+            createDeleteRequest: function(event) {
+                if (event.target.parentNode.querySelectorAll('input')[0].validate()) {
+                    var newItem = new Object();
+                    var keysObject = new Object();
+                    newItem.name = this.name;
+                    newItem.method = 'DELETE';
+                    newItem.params = {key: event.target.parentNode.querySelectorAll('input')[0].value };
+                    this.set('valueToSend', newItem);
                 }
             },
 
