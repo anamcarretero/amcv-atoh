@@ -258,7 +258,11 @@
             },
 
             _jsonChanged: function () {
-                this.set('data', this.json.keys);
+                var aux = [];
+                for(var i in this.json.keys) {
+                    aux[i] = {key: this.json.keys[i].key, value: this.json.keys[i].value}
+                }
+                this.set('data', aux);
             },
 
             setMode: function (mode, modes) {
